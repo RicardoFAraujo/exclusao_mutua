@@ -5,6 +5,7 @@ from datetime import datetime
 
 F = 10  # Tamanho fixo das mensagens em bytes
 SEPARADOR = '|'
+TIMEOUT = 5  # Tempo máximo de espera pelo GRANT (em segundos)
 
 class Processo:
     def __init__(self, id_processo, host='localhost', porta=5000, repeticoes=5, tempo_espera=2):
@@ -15,6 +16,7 @@ class Processo:
         self.tempo_espera = tempo_espera
         
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        self.socket.settimeout(TIMEOUT)  # Define timeout para evitar bloqueios indefinidos
         
     def formatar_mensagem(self, identificador):
         mensagem = f"{identificador}{SEPARADOR}{self.id_processo}{SEPARADOR}".ljust(F, '0')
@@ -25,12 +27,16 @@ class Processo:
     
     def aguardar_grant(self):
         while True:
-            data, _ = self.socket.recvfrom(F)
-            mensagem = data.decode().strip('0')
-            partes = mensagem.split(SEPARADOR)
-            if partes[0] == "3" and partes[1] == self.id_processo:
-                print(f"Processo {self.id_processo} recebeu GRANT e pode acessar a região crítica")
-                return
+            try:
+                data, _ = self.socket.recvfrom(F)
+                mensagem = data.decode().strip('0')
+                partes = mensagem.split(SEPARADOR)
+                if partes[0] == "3" and partes[1] == self.id_processo:
+                    print(f"Processo {self.id_processo} recebeu GRANT e pode acessar a região crítica")
+                    return
+            except socket.timeout:
+                print(f"[Aviso] Processo {self.id_processo} não recebeu GRANT dentro do tempo limite.")
+                return  # Sai do loop para evitar bloqueios indefinidos
     
     def executar(self):
         for _ in range(self.repeticoes):
