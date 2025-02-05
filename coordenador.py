@@ -3,6 +3,9 @@ import threading
 import queue
 import time
 
+F = 10  # Tamanho fixo das mensagens em bytes
+SEPARADOR = '|'
+
 class Coordenador:
     def __init__(self, host='localhost', porta=5000):
         self.host = host
@@ -22,8 +25,12 @@ class Coordenador:
         timestamp = time.strftime('%Y-%m-%d %H:%M:%S')
         with open("log_coordenador.txt", "a") as f:
             f.write(f'[{timestamp}] {mensagem}\n')
-        print(f'[{timestamp}] {mensagem}')
         
+        
+    def formatar_mensagem(self, identificador, processo_id):
+        mensagem = f"{identificador}{SEPARADOR}{processo_id}{SEPARADOR}".ljust(F, '0')
+        return mensagem
+    
     def receber_conexoes(self):
         while self.rodando:
             try:
@@ -35,20 +42,20 @@ class Coordenador:
     def tratar_mensagem(self, conn):
         try:
             while self.rodando:
-                mensagem = conn.recv(1024).decode()
+                mensagem = conn.recv(F).decode().strip('0')
                 if not mensagem:
                     break
                 
                 self.log(f'Recebido: {mensagem}')
-                partes = mensagem.split()
+                partes = mensagem.split(SEPARADOR)
                 
-                if partes[0] == "REQUEST":
+                if partes[0] == "1":  # REQUEST
                     processo_id = partes[1]
                     with self.lock:
                         self.fila_pedidos.put(processo_id)
                     self.log(f'Processo {processo_id} adicionou pedido na fila')
                 
-                elif partes[0] == "RELEASE":
+                elif partes[0] == "2":  # RELEASE
                     processo_id = partes[1]
                     with self.lock:
                         if not self.fila_pedidos.empty() and self.fila_pedidos.queue[0] == processo_id:
@@ -71,20 +78,20 @@ class Coordenador:
     
     def interface_terminal(self):
         while self.rodando:
-            comando = input("Comando: ")
-            if comando == "fila":
+            comando = input("Digite 1) imprimir a fila de pedidos atual, 2) imprimir quantas vezes cada processo foi atendido, 3) encerrar a execução.")
+            if comando == "1":
                 with self.lock:
                     print("Fila de pedidos:", list(self.fila_pedidos.queue))
-            elif comando == "atendimentos":
+            elif comando == "2":
                 with self.lock:
                     print("Atendimentos por processo:", self.atendimentos)
-            elif comando == "sair":
+            elif comando == "3":
                 self.rodando = False
                 self.server_socket.close()
                 print("Encerrando coordenador...")
                 break
             else:
-                print("Comando desconhecido. Use: fila, atendimentos, sair")
+                print("Comando desconhecido. Use: Digite 1) imprimir a fila de pedidos atual, 2) imprimir quantas vezes cada processo foi atendido, 3) encerrar a execução.")
 
     def iniciar(self):
         threading.Thread(target=self.receber_conexoes, daemon=True).start()
