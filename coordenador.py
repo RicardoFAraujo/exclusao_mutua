@@ -14,87 +14,82 @@ class Coordenador:
         self.atendimentos = {}
         self.lock = threading.Lock()
         self.rodando = True
+        self.processos = {}  # Armazena endereço dos processos
         
-        self.server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.server_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         self.server_socket.bind((self.host, self.porta))
-        self.server_socket.listen(5)
         
-        print(f'Coordenador ouvindo em {self.host}:{self.porta}')
+        print(f'Coordenador ouvindo em {self.host}:{self.porta} (UDP)')
         
     def log(self, mensagem):
         timestamp = time.strftime('%Y-%m-%d %H:%M:%S')
         with open("log_coordenador.txt", "a") as f:
             f.write(f'[{timestamp}] {mensagem}\n')
         
-        
     def formatar_mensagem(self, identificador, processo_id):
         mensagem = f"{identificador}{SEPARADOR}{processo_id}{SEPARADOR}".ljust(F, '0')
         return mensagem
     
-    def receber_conexoes(self):
+    def receber_mensagens(self):
         while self.rodando:
             try:
-                conn, addr = self.server_socket.accept()
-                threading.Thread(target=self.tratar_mensagem, args=(conn,)).start()
-            except socket.error:
-                break
-        
-    def tratar_mensagem(self, conn):
-        try:
-            while self.rodando:
-                mensagem = conn.recv(F).decode().strip('0')
-                if not mensagem:
-                    break
+                mensagem, addr = self.server_socket.recvfrom(F)
+                mensagem = mensagem.decode().strip('0')
                 
-                self.log(f'Recebido: {mensagem}')
+                if not mensagem:
+                    continue
+                
                 partes = mensagem.split(SEPARADOR)
+                processo_id = partes[1]
+                self.processos[processo_id] = addr  # Armazena o endereço do processo
+                
+                self.log(f'Recebido de {processo_id} ({addr}): {mensagem}')
                 
                 if partes[0] == "1":  # REQUEST
-                    processo_id = partes[1]
                     with self.lock:
                         self.fila_pedidos.put(processo_id)
                     self.log(f'Processo {processo_id} adicionou pedido na fila')
                 
                 elif partes[0] == "2":  # RELEASE
-                    processo_id = partes[1]
                     with self.lock:
                         if not self.fila_pedidos.empty() and self.fila_pedidos.queue[0] == processo_id:
                             self.fila_pedidos.get()
                             self.atendimentos[processo_id] = self.atendimentos.get(processo_id, 0) + 1
                             self.log(f'Processo {processo_id} liberou a região crítica')
                 
-        except Exception as e:
-            self.log(f'Erro: {e}')
-        finally:
-            conn.close()
+            except Exception as e:
+                self.log(f'Erro: {e}')
     
     def gerenciar_exclusao_mutua(self):
         while self.rodando:
             with self.lock:
                 if not self.fila_pedidos.empty():
                     processo_atual = self.fila_pedidos.queue[0]
-                    self.log(f'Concedendo acesso ao Processo {processo_atual}')
+                    if processo_atual in self.processos:
+                        mensagem_grant = self.formatar_mensagem("3", processo_atual)  # 3 = GRANT
+                        self.server_socket.sendto(mensagem_grant.encode(), self.processos[processo_atual])
+                        self.log(f'Enviado GRANT para Processo {processo_atual}')
             time.sleep(1)
     
     def interface_terminal(self):
         while self.rodando:
-            comando = input("Digite 1) imprimir a fila de pedidos atual, 2) imprimir quantas vezes cada processo foi atendido, 3) encerrar a execução.")
-            if comando == "1":
+            comando = input("Comando: ")
+            if comando == "fila":
                 with self.lock:
                     print("Fila de pedidos:", list(self.fila_pedidos.queue))
-            elif comando == "2":
+            elif comando == "atendimentos":
                 with self.lock:
                     print("Atendimentos por processo:", self.atendimentos)
-            elif comando == "3":
+            elif comando == "sair":
                 self.rodando = False
                 self.server_socket.close()
                 print("Encerrando coordenador...")
                 break
             else:
-                print("Comando desconhecido. Use: Digite 1) imprimir a fila de pedidos atual, 2) imprimir quantas vezes cada processo foi atendido, 3) encerrar a execução.")
+                print("Comando desconhecido. Use: fila, atendimentos, sair")
 
     def iniciar(self):
-        threading.Thread(target=self.receber_conexoes, daemon=True).start()
+        threading.Thread(target=self.receber_mensagens, daemon=True).start()
         threading.Thread(target=self.gerenciar_exclusao_mutua, daemon=True).start()
         self.interface_terminal()
 

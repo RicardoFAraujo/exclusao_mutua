@@ -14,19 +14,24 @@ class Processo:
         self.repeticoes = repeticoes
         self.tempo_espera = tempo_espera
         
+        self.socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        
     def formatar_mensagem(self, identificador):
         mensagem = f"{identificador}{SEPARADOR}{self.id_processo}{SEPARADOR}".ljust(F, '0')
         return mensagem
     
     def enviar_mensagem(self, mensagem):
-        try:
-            with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-                s.connect((self.host, self.porta))
-                s.sendall(mensagem.encode())
-        except ConnectionRefusedError:
-            print(f"[Erro] Não foi possível conectar ao coordenador {self.host}:{self.porta}")
-            sys.exit(1)
-        
+        self.socket.sendto(mensagem.encode(), (self.host, self.porta))
+    
+    def aguardar_grant(self):
+        while True:
+            data, _ = self.socket.recvfrom(F)
+            mensagem = data.decode().strip('0')
+            partes = mensagem.split(SEPARADOR)
+            if partes[0] == "3" and partes[1] == self.id_processo:
+                print(f"Processo {self.id_processo} recebeu GRANT e pode acessar a região crítica")
+                return
+    
     def executar(self):
         for _ in range(self.repeticoes):
             # Solicita acesso à região crítica
@@ -34,8 +39,8 @@ class Processo:
             self.enviar_mensagem(mensagem_request)
             print(f"Processo {self.id_processo} solicitou acesso à região crítica")
             
-            # Aguarda permissão
-            time.sleep(1)
+            # Aguarda permissão (GRANT)
+            self.aguardar_grant()
             
             # Escreve no arquivo resultado.txt
             with open("resultado.txt", "a") as f:
@@ -52,6 +57,7 @@ class Processo:
             time.sleep(self.tempo_espera)
         
         print(f"Processo {self.id_processo} finalizado.")
+        self.socket.close()
 
 if __name__ == "__main__":
     if len(sys.argv) != 4:
