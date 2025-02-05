@@ -1,0 +1,71 @@
+[2025-02-05 20:18:52] Recebido: REQUEST 1
+[2025-02-05 20:18:52] Processo 1 adicionou pedido na fila
+[2025-02-05 20:18:52] Concedendo acesso ao Processo 1
+[2025-02-05 20:18:53] Recebido: REQUEST 2
+[2025-02-05 20:18:53] Processo 2 adicionou pedido na fila
+[2025-02-05 20:18:53] Recebido: RELEASE 1
+[2025-02-05 20:18:53] Processo 1 liberou a região crítica
+[2025-02-05 20:18:53] Concedendo acesso ao Processo 2
+[2025-02-05 20:18:54] Recebido: RELEASE 2
+[2025-02-05 20:18:54] Processo 2 liberou a região crítica
+[2025-02-05 20:18:54] Recebido: REQUEST 3
+[2025-02-05 20:18:54] Processo 3 adicionou pedido na fila
+[2025-02-05 20:18:54] Concedendo acesso ao Processo 3
+[2025-02-05 20:18:55] Recebido: RELEASE 3
+[2025-02-05 20:18:55] Processo 3 liberou a região crítica
+[2025-02-05 20:18:55] Recebido: REQUEST 4
+[2025-02-05 20:18:55] Processo 4 adicionou pedido na fila
+[2025-02-05 20:18:55] Recebido: REQUEST 1
+[2025-02-05 20:18:55] Processo 1 adicionou pedido na fila
+[2025-02-05 20:18:55] Concedendo acesso ao Processo 4
+[2025-02-05 20:18:56] Recebido: REQUEST 2
+[2025-02-05 20:18:56] Processo 2 adicionou pedido na fila
+[2025-02-05 20:18:56] Recebido: RELEASE 4
+[2025-02-05 20:18:56] Processo 4 liberou a região crítica
+[2025-02-05 20:18:56] Recebido: RELEASE 1
+[2025-02-05 20:18:56] Processo 1 liberou a região crítica
+[2025-02-05 20:18:56] Recebido: REQUEST 5
+[2025-02-05 20:18:56] Processo 5 adicionou pedido na fila
+[2025-02-05 20:18:56] Concedendo acesso ao Processo 2
+[2025-02-05 20:18:57] Recebido: RELEASE 2
+[2025-02-05 20:18:57] Processo 2 liberou a região crítica
+[2025-02-05 20:18:57] Recebido: REQUEST 3
+[2025-02-05 20:18:57] Processo 3 adicionou pedido na fila
+[2025-02-05 20:18:57] Recebido: RELEASE 5
+[2025-02-05 20:18:57] Processo 5 liberou a região crítica
+[2025-02-05 20:18:57] Concedendo acesso ao Processo 3
+[2025-02-05 20:18:58] Recebido: RELEASE 3
+[2025-02-05 20:18:58] Processo 3 liberou a região crítica
+[2025-02-05 20:18:58] Recebido: REQUEST 4
+[2025-02-05 20:18:58] Processo 4 adicionou pedido na fila
+[2025-02-05 20:18:58] Recebido: REQUEST 1
+[2025-02-05 20:18:58] Processo 1 adicionou pedido na fila
+[2025-02-05 20:18:58] Concedendo acesso ao Processo 4
+[2025-02-05 20:18:59] Recebido: REQUEST 2
+[2025-02-05 20:18:59] Processo 2 adicionou pedido na fila
+[2025-02-05 20:18:59] Recebido: RELEASE 4
+[2025-02-05 20:18:59] Processo 4 liberou a região crítica
+[2025-02-05 20:18:59] Recebido: RELEASE 1
+[2025-02-05 20:18:59] Processo 1 liberou a região crítica
+[2025-02-05 20:18:59] Recebido: REQUEST 5
+[2025-02-05 20:18:59] Processo 5 adicionou pedido na fila
+[2025-02-05 20:18:59] Concedendo acesso ao Processo 2
+[2025-02-05 20:19:00] Recebido: RELEASE 2
+[2025-02-05 20:19:00] Processo 2 liberou a região crítica
+[2025-02-05 20:19:00] Recebido: REQUEST 3
+[2025-02-05 20:19:00] Processo 3 adicionou pedido na fila
+[2025-02-05 20:19:00] Recebido: RELEASE 5
+[2025-02-05 20:19:00] Processo 5 liberou a região crítica
+[2025-02-05 20:19:00] Concedendo acesso ao Processo 3
+[2025-02-05 20:19:01] Recebido: RELEASE 3
+[2025-02-05 20:19:01] Processo 3 liberou a região crítica
+[2025-02-05 20:19:01] Recebido: REQUEST 4
+[2025-02-05 20:19:01] Processo 4 adicionou pedido na fila
+[2025-02-05 20:19:01] Concedendo acesso ao Processo 4
+[2025-02-05 20:19:02] Recebido: RELEASE 4
+[2025-02-05 20:19:02] Processo 4 liberou a região crítica
+[2025-02-05 20:19:02] Recebido: REQUEST 5
+[2025-02-05 20:19:02] Processo 5 adicionou pedido na fila
+[2025-02-05 20:19:02] Concedendo acesso ao Processo 5
+[2025-02-05 20:19:03] Recebido: RELEASE 5
+[2025-02-05 20:19:03] Processo 5 liberou a região crítica
